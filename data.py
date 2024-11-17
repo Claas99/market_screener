@@ -17,7 +17,6 @@ import re
 
 '''Sentiment Analysis'''
 import praw
-from dotenv import load_dotenv
 import os
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
@@ -156,13 +155,11 @@ def get_ebay_data(user_input: str) -> pd.DataFrame:
 
 def get_reddit_data(user_input: str) -> pd.DataFrame:
     # Load environment variables from .env file
-    # Loading the .env file
-    load_dotenv()
 
     # Accessing the credentials
-    client_id = os.getenv('CLIENT_ID')
-    client_secret = os.getenv('CLIENT_SECRET')
-    user_agent = os.getenv('USER_AGENT')
+    client_id = 'osuOildN-sklgkxiJE8yKw'
+    client_secret = 'snbv_beKAFSCKEexakskCiDxNRmlrA'
+    user_agent = 'Ok-Aerie-1980'
 
     # Reddit API credentials
     reddit = praw.Reddit(client_id=f'{client_id}', 

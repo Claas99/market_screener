@@ -199,49 +199,53 @@ st.write(
 selected_option = st.text_input(
         "Search for product you want to analyze::", placeholder="E.g. MacBook Air 2020 1TB"
     )
-
-st.write("Data scraping starts...")
+if ss["analysis_done"]==False and selected_option:
+    st.write("Data scraping starts...")
 
 tab1, tab2, tab3 = st.tabs(["Plots", "KPIs", "Data Preview"])
 
-ebay_df, product_image_url = data.get_ebay_data(selected_option)
-reddit_df, overall_sentiment_score = data.get_reddit_data(selected_option) 
-st.image(product_image_url, caption=f"{selected_option} Picture")
+if selected_option:
+    ebay_df, product_image_url = data.get_ebay_data(selected_option)
+    reddit_df, overall_sentiment_score = data.get_reddit_data(selected_option) 
+    ss['analysis_done'] = True
 
-with tab1:
+if ss['analysis_done']:
+    st.image(product_image_url, caption=f"{selected_option} Picture")
+
+    with tab1:
+        
+        st.plotly_chart(show_price_plots(ebay_df))
+        st.plotly_chart(get_histogram_plotly(reddit_df))
+        st.plotly_chart(get_donut_chart_plotly(data.get_reddit_data(selected_option)))
+        
+
+    with tab2:
+        st.write("### KPIs")
+        st.write(f"Mean Price: {ebay_df.price.mean()}")
+        st.write(f"Median Price: {ebay_df.price.median()}")
+        st.write(f"Overall Sentiment Score: {overall_sentiment_score}")
+
+
+        grouped = data.groupby(['condition', 'seller_type'])['price'].mean().reset_index()
+        # Pivot the table to compare the prices side by side
+        pivoted = grouped.pivot(index='condition', columns='seller_type', values='price')
+        # Calculate the average price difference between seller types for each condition
+        pivoted['price_difference_percent'] = ((pivoted['Gewerblich'] - pivoted['Privat'])/pivoted['Privat'])*100
+        # Mean Difference of the seller type prices in all conditions
+        avg_price_by_seller_type_and_condition = pivoted['price_difference_percent'].mean()
+        # Conditional print
+        if avg_price_by_seller_type_and_condition > 0:
+            st.write(f"The prices from Privat for each condition are on average {avg_price_by_seller_type_and_condition:.2f}% cheaper than from Gewerblich.")
+        else:
+            st.write(f"The prices from Gewerblich for each condition are on average {(avg_price_by_seller_type_and_condition * -1):.2f}% cheaper than from Privat.")
     
-    st.plotly_chart(show_price_plots(data.get_ebay_data(selected_option)))
-    st.plotly_chart(get_histogram_plotly(data.get_reddit_data(selected_option)))
-    st.plotly_chart(get_donut_chart_plotly(data.get_reddit_data(selected_option)))
     
 
-with tab2:
-    st.write("### KPIs")
-    st.write(f"Mean Price: {ebay_df.price.mean()}")
-    st.write(f"Median Price: {ebay_df.price.median()}")
-    st.write(f"Overall Sentiment Score: {overall_sentiment_score}")
-
-
-    grouped = data.groupby(['condition', 'seller_type'])['price'].mean().reset_index()
-    # Pivot the table to compare the prices side by side
-    pivoted = grouped.pivot(index='condition', columns='seller_type', values='price')
-    # Calculate the average price difference between seller types for each condition
-    pivoted['price_difference_percent'] = ((pivoted['Gewerblich'] - pivoted['Privat'])/pivoted['Privat'])*100
-    # Mean Difference of the seller type prices in all conditions
-    avg_price_by_seller_type_and_condition = pivoted['price_difference_percent'].mean()
-    # Conditional print
-    if avg_price_by_seller_type_and_condition > 0:
-        st.write(f"The prices from Privat for each condition are on average {avg_price_by_seller_type_and_condition:.2f}% cheaper than from Gewerblich.")
-    else:
-        st.write(f"The prices from Gewerblich for each condition are on average {(avg_price_by_seller_type_and_condition * -1):.2f}% cheaper than from Privat.")
-    
-    
-
-with tab3:
-    # Show data preview
-    df = data.get_ebay_data(selected_option)
-    st.write("### Data Preview")
-    st.dataframe(df.head())
+    with tab3:
+        # Show data preview
+        df = data.get_ebay_data(selected_option)
+        st.write("### Data Preview")
+        st.dataframe(df.head())
 
 
 
