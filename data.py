@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
 import time 
+import streamlit as st
 
 '''Data Engineering'''
 import pandas as pd
@@ -20,7 +21,7 @@ import praw
 import os
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-
+@st.cache_data
 def get_ebay_data(user_input: str) -> pd.DataFrame:
     # Creating the webdriver
     driver = webdriver.Firefox()
@@ -153,6 +154,7 @@ def get_ebay_data(user_input: str) -> pd.DataFrame:
 
     return data, product_image_url
 
+@st.cache_data
 def get_reddit_data(user_input: str) -> pd.DataFrame:
     # Load environment variables from .env file
 
@@ -185,11 +187,6 @@ def get_reddit_data(user_input: str) -> pd.DataFrame:
         # Combining title and body for sentiment analysis
         text = post[0] + " " + post[1]
         sentiment_scores = analyzer.polarity_scores(text)
-        
-        # Display post title and sentiment analysis
-        print(f"Post: {post[0]}")
-        print(f"Sentiment Scores: {sentiment_scores}")
-        print('---')
 
     # Function to get sentiment score for each post
     def get_sentiment(text):
@@ -220,3 +217,4 @@ def get_reddit_data(user_input: str) -> pd.DataFrame:
     posts_df['Sentiment_Classifier'] = posts_df['Sentiment'].apply(classify_sentiment)
 
     return posts_df, overall_classification
+

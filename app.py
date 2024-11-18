@@ -200,7 +200,7 @@ selected_option = st.text_input(
         "Search for product you want to analyze::", placeholder="E.g. MacBook Air 2020 1TB"
     )
 if ss["analysis_done"]==False and selected_option:
-    st.write("Data scraping starts...")
+    st.write("Data scraping starts...(this might take a while)")
 
 tab1, tab2, tab3 = st.tabs(["Plots", "KPIs", "Data Preview"])
 
@@ -215,8 +215,8 @@ if ss['analysis_done']:
     with tab1:
         
         st.plotly_chart(show_price_plots(ebay_df))
-        st.plotly_chart(get_histogram_plotly(reddit_df))
-        st.plotly_chart(get_donut_chart_plotly(data.get_reddit_data(selected_option)))
+        # st.plotly_chart(get_histogram_plotly(reddit_df))
+        # st.plotly_chart(get_donut_chart_plotly(data.get_reddit_data(selected_option)))
         
 
     with tab2:
